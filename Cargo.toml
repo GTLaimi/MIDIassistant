@@ -1,0 +1,12 @@
+[package]
+name = "midi_assistant"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+midly = { version = "0.5", features = ["std"] }
+anyhow = "1.0"
+
+# 新增：UI 框架依赖
+eframe = "0.29"
+egui = "0.29"
