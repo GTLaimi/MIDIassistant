@@ -20,7 +20,7 @@ This is an early alpha release (v0.1.0). While functional, some parts are AI-ass
 ```bash
 cargo run --release
 ```
-3.Use the Spacebar to Play/Pause and the 'R' key to Reset.
+3. Use the Spacebar to Play/Pause and the 'R' key to Reset.
 
 ## License
 MIT
