@@ -21,3 +21,11 @@ This is an early alpha release (v0.1.0). While functional, some parts are AI-ass
 cargo run --release
 ```
 3.Use the Spacebar to Play/Pause and the 'R' key to Reset.
+
+## Development / Contributing
+
+This project uses `#![deny(warnings)]` to ensure code quality. 
+Before submitting a Pull Request, please make sure there are no compiler warnings.
+To test locally:
+1. Place a `test.mid` in the project root.
+2. Run `cargo run --release` to build and launch the app.
