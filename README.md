@@ -22,8 +22,10 @@ cargo run --release
 ```
 3.Use the Spacebar to Play/Pause and the 'R' key to Reset.
 
-## Development / Contributing
+## License
+MIT
 
+## Development / Contributing
 This project uses `#![deny(warnings)]` to ensure code quality. 
 Before submitting a Pull Request, please make sure there are no compiler warnings.
 To test locally:
