@@ -6,7 +6,6 @@ edition = "2021"
 [dependencies]
 midly = { version = "0.5", features = ["std"] }
 anyhow = "1.0"
-
-# 新增：UI 框架依赖
 eframe = "0.29"
 egui = "0.29"
+rfd = "0.14.1"  # 新增：用于弹出文件选择对话框
