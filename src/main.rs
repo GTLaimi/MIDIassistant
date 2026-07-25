@@ -138,7 +138,7 @@ impl eframe::App for MidiApp {
                 ui.label(format!("总音符: {}", notes_len));
                 ui.label(format!("BPM: {:.1}", bpm));
                 ui.label(format!("拍号: {}", time_sig));
-                ui.label(format!("状态: {}", if is_playing { "播放中" } else { "暂停" }));
+                ui.label(format!("状态: {}", if is_playing { "▶️ 播放中" } else { "⏸️ 暂停" }));
             });
 
             if !file_loaded || notes.is_empty() {
@@ -147,7 +147,6 @@ impl eframe::App for MidiApp {
                         rect.center(),
                         Align2::CENTER_CENTER,
                         "点击左上角按钮加载 MIDI 文件",
-                        // 使用 proportional 以使用加载的中文字体
                         FontId::proportional(16.0),
                         Color32::GRAY,
                     );
@@ -281,21 +280,24 @@ fn main() -> eframe::Result<()> {
         ..Default::default()
     };
 
-    // 关键修复：在初始化 eframe 时加载支持中文的字体
+    // 【关键修复】仅针对 Windows 尝试加载微软雅黑，Linux/macOS 跳过它就不会报错了！
     eframe::run_native("MIDIassistant", options, Box::new(|cc| {
-        // 配置字体系统
         let mut fonts = egui::FontDefinitions::default();
-        // 安装默认支持中文的字体（微软雅黑），如果系统里有的话
-        fonts.font_data.insert(
-            "msyh".to_owned(),
-            egui::FontData::from_static(include_bytes!("c:/Windows/Fonts/msyh.ttc")), // Windows 路径
-        );
-        // 将中文字体设为最高优先级，并作为后备字体
-        fonts.families.get_mut(&egui::FontFamily::Proportional).unwrap()
-            .insert(0, "msyh".to_owned());
-        fonts.families.get_mut(&egui::FontFamily::Monospace).unwrap()
-            .push("msyh".to_owned());
-        
+
+        if cfg!(target_os = "windows") {
+            // 尝试用运行时读取的方式加载 Windows 字体
+            if let Ok(data) = std::fs::read("c:/Windows/Fonts/msyh.ttc") {
+                fonts.font_data.insert(
+                    "msyh".to_owned(),
+                    egui::FontData::from_owned(data).into(),
+                );
+                fonts.families.get_mut(&egui::FontFamily::Proportional).unwrap()
+                    .insert(0, "msyh".to_owned());
+                fonts.families.get_mut(&egui::FontFamily::Monospace).unwrap()
+                    .push("msyh".to_owned());
+            }
+        }
+
         cc.egui_ctx.set_fonts(fonts);
 
         Ok(Box::new(MidiApp::new()))
