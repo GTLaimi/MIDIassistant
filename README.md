@@ -2,32 +2,41 @@
 
 ![Rust](https://img.shields.io/badge/language-Rust-orange)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Version](https://img.shields.io/badge/version-v0.1.0-blue)
+![Version](https://img.shields.io/badge/version-v0.1.1-blue)
+![Build](https://img.shields.io/github/actions/workflow/status/GTLaimi/MIDIassistant/rust.yml?branch=main)
 
-A lightweight Rust-based MIDI player with a piano roll visualization interface.
+> A lightweight, real-time MIDI piano roll visualizer written in Rust using `egui` and `eframe`.
 
-This is an early alpha release (v0.1.0). While functional, some parts are AI-assisted and the codebase is currently undergoing active refinement.
+<img width="1920" height="1080" alt="屏幕截图 2026-07-25 150319" src="https://github.com/user-attachments/assets/b47ad89e-ecbe-4d63-ab41-8c8b1522e994" />
 
-## Features
-- Load `.mid` files
-- Real-time physical tempo synchronization (BPM/PPQ)
-- Standard piano keyboard rendering
-- Playback indicator (playhead)
 
-## Usage
-1. Place a `.mid` file named `test.mid` in the project root.
-2. Run the application:
+## ✨ Features (v0.1.1)
+- **Load `.mid` files** via native file selector (no more hardcoding `test.mid`).
+- **Real-time physical synchronization**: Precise BPM/PPQ conversion engine.
+- **Piano roll view** with standard keyboard rendering and pitch grid alignment.
+- **Active note highlighting**: Notes turn cyan and glow when the playhead passes over them.
+- **Playback head** (bright yellow indicator).
+- **Sidebar information**: Displays BPM, time signature, and total notes.
+- **Error handling**: Clear error prompts in the UI if a MIDI file fails to load.
+
+## ⌨️ Controls
+- `Space` : Play / Pause
+- `R` : Reset to the beginning of the track
+- `Button` : "打开 MIDI 文件" to open any MIDI file on your computer
+
+## 🚀 How to Build & Run
 ```bash
+# Clone the repository
+git clone https://github.com/GTLaimi/MIDIassistant.git
+cd MIDIassistant
+
+# Build the release version
+cargo build --release
+
+# Run the application
 cargo run --release
 ```
-3. Use the Spacebar to Play/Pause and the 'R' key to Reset.
+(💡 Note: A pre-compiled .exe for Windows is available in the Releases page!)
 
-## License
-MIT
-
-## Development / Contributing
-This project uses `#![deny(warnings)]` to ensure code quality. 
-Before submitting a Pull Request, please make sure there are no compiler warnings.
-To test locally:
-1. Place a `test.mid` in the project root.
-2. Run `cargo run --release` to build and launch the app.
+## 📝 License
+Licensed under the MIT license.
