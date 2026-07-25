@@ -5,6 +5,8 @@
 ![Version](https://img.shields.io/badge/version-v0.1.1-blue)
 ![Build](https://img.shields.io/github/actions/workflow/status/GTLaimi/MIDIassistant/rust.yml?branch=main)
 
+> `[中文文档](README_zh.md)`
+
 > A lightweight, real-time MIDI piano roll visualizer written in Rust using `egui` and `eframe`.
 
 <img width="1920" height="1080" alt="屏幕截图 2026-07-25 150319" src="https://github.com/user-attachments/assets/b47ad89e-ecbe-4d63-ab41-8c8b1522e994" />
