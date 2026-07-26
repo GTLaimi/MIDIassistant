@@ -22,7 +22,7 @@
 - **Sidebar information**: Displays BPM, time signature, and total notes.
 - **Error handling**: Clear error prompts in the UI if a MIDI file fails to load.
 
-  ## 🎨 Powerful Visual Customization (v0.1.2)
+## 🎨 Powerful Visual Customization (v0.1.2)
 The app now includes a built-in `⚙️ Visual Settings` menu. You can tweak the following parameters in real-time:
 - **Background RGB**: Fine-tune the workspace color with 0.0 ~ 1.0 sliders and instant preview.
 - **Keyboard Scaling**: Adjust the visual width and height of both White and Black keys.
