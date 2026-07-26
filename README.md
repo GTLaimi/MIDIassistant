@@ -9,7 +9,8 @@
 
 > A lightweight, real-time MIDI piano roll visualizer written in Rust using `egui` and `eframe`.
 
-<img width="1920" height="1080" alt="屏幕截图 2026-07-25 150319" src="https://github.com/user-attachments/assets/b47ad89e-ecbe-4d63-ab41-8c8b1522e994" />
+<img width="1920" height="1080" alt="屏幕截图 2026-07-26 104003" src="https://github.com/user-attachments/assets/00f73b4e-08e9-4bb5-bf04-bf62df8eac05" />
+
 
 
 ## ✨ Features (v0.1.1)
@@ -20,6 +21,15 @@
 - **Playback head** (bright yellow indicator).
 - **Sidebar information**: Displays BPM, time signature, and total notes.
 - **Error handling**: Clear error prompts in the UI if a MIDI file fails to load.
+
+  ## 🎨 Powerful Visual Customization (v0.1.2)
+The app now includes a built-in `⚙️ Visual Settings` menu. You can tweak the following parameters in real-time:
+- **Background RGB**: Fine-tune the workspace color with 0.0 ~ 1.0 sliders and instant preview.
+- **Keyboard Scaling**: Adjust the visual width and height of both White and Black keys.
+- **Note & Label Tweaks**: Modify the note block height ratio and adjust the vertical position of note name labels (e.g., C4).
+- **Vertical Range Slider**: Easily scroll the visible pitch range up and down.
+
+> ❗ **Piano Roll Fix**: The keyboard rendering has been completely overhauled. It now uses the physically correct **7-white-key, 5-black-key** layout per octave, eliminating the previous alignment errors. 
 
 ## ⌨️ Controls
 - `Space` : Play / Pause
