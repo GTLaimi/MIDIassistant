@@ -6,6 +6,8 @@
 
 > A lightweight, real-time MIDI piano roll visualizer written in Rust using `egui` and `eframe`. Fully customizable and ready for your creative workflow.
 
+<img width="1920" height="1080" alt="屏幕截图 2026-07-27 100738" src="https://github.com/user-attachments/assets/26f9763c-742e-4e5d-9f62-db537c344f92" />
+
 ## ✨ Features (v0.1.4 Update)
 
 - **MIDI File Loading**: Open any `.mid` file directly via the sidebar.
