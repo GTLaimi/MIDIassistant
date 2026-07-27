@@ -1,34 +1,58 @@
+use serde::{Deserialize, Serialize};
 use crate::models::note::Note;
 
-#[derive(Debug, Clone)]
-pub struct VisualSettings {
-    // 颜色
-    pub bg_r: f32,
-    pub bg_g: f32,
-    pub bg_b: f32,
-    // 键盘
-    pub kbd_width: f32,
-    pub black_key_width: f32,
-    pub black_key_height_ratio: f32,
-    // 卷帘窗与音符
-    pub pitch_min: i32, // 【核心】基准音高（配合垂直滑动条）
-    pub note_height_ratio: f32,
-    pub label_y_offset: f32,
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum DisplayMode {
+    Time,
+    TimePercent,
+    NoteCount,
+    NotePercent,
+    BarBeat,
 }
 
-impl Default for VisualSettings {
-    fn default() -> Self {
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum SettingsTab {
+    Colors,
+    Layout,
+    About,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct VisualSettings {
+    pub piano_bg_r: u8, pub piano_bg_g: u8, pub piano_bg_b: u8,
+    pub white_key_r: u8, pub white_key_g: u8, pub white_key_b: u8,
+    pub black_key_r: u8, pub black_key_g: u8, pub black_key_b: u8,
+    pub note_r: u8, pub note_g: u8, pub note_b: u8,
+    pub active_note_r: u8, pub active_note_g: u8, pub active_note_b: u8,
+    pub text_r: u8, pub text_g: u8, pub text_b: u8,
+    pub cursor_r: u8, pub cursor_g: u8, pub cursor_b: u8,
+    pub grid_bright_r: u8, pub grid_bright_g: u8, pub grid_bright_b: u8,
+    pub grid_dim_r: u8, pub grid_dim_g: u8, pub grid_dim_b: u8,
+    pub pitch_min: i32,
+    pub pitch_range: i32,
+    // time_offset 已删除
+    pub time_zoom: f32,
+    pub follow_playhead: bool,
+    pub show_cursor: bool,
+}
+
+impl VisualSettings {
+    pub fn default() -> Self {
         Self {
-            // 默认应用你刚刚调试出来的完美参数
-            bg_r: 0.200,
-            bg_g: 0.200,
-            bg_b: 0.200,
-            kbd_width: 50.0,
-            black_key_width: 50.0,
-            black_key_height_ratio: 0.88,
-            pitch_min: 50,
-            note_height_ratio: 0.80,
-            label_y_offset: 121.0,
+            piano_bg_r: 22, piano_bg_g: 22, piano_bg_b: 22,
+            white_key_r: 240, white_key_g: 240, white_key_b: 240,
+            black_key_r: 20, black_key_g: 20, black_key_b: 20,
+            note_r: 100, note_g: 210, note_b: 100,
+            active_note_r: 50, active_note_g: 200, active_note_b: 255,
+            text_r: 0, text_g: 0, text_b: 0,
+            cursor_r: 255, cursor_g: 255, cursor_b: 0,
+            grid_bright_r: 110, grid_bright_g: 110, grid_bright_b: 110,
+            grid_dim_r: 50, grid_dim_g: 50, grid_dim_b: 50,
+            pitch_min: 40,
+            pitch_range: 48,
+            time_zoom: 0.5, // 改为 0.5，确保在调节范围内
+            follow_playhead: true,
+            show_cursor: true,
         }
     }
 }
@@ -45,8 +69,14 @@ pub struct AppState {
     pub ppq: u32,
     pub time_sig: String,
     pub load_error: Option<String>,
-    // 将调试参数升级为正式视觉设置
     pub settings: VisualSettings,
+    pub show_settings: bool,
+    pub display_mode: DisplayMode,
+    pub settings_tab: SettingsTab,
+    pub show_note_list: bool,
+    pub active_theme_name: String,
+    pub plugin_overrides_theme: bool,
+    pub show_theme_window: bool,
 }
 
 impl AppState {
@@ -63,6 +93,13 @@ impl AppState {
             time_sig: "4/4".to_string(),
             load_error: None,
             settings: VisualSettings::default(),
+            show_settings: false,
+            display_mode: DisplayMode::Time,
+            settings_tab: SettingsTab::Colors,
+            show_note_list: false,
+            active_theme_name: "default".to_string(),
+            plugin_overrides_theme: false,
+            show_theme_window: false,
         }
     }
 }
