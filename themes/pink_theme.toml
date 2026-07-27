@@ -1,0 +1,51 @@
+# 精确复刻截图的粉色赛博朋克主题
+name = "Pink Neon (Exact)"
+description = "完美对照设置面板数值的粉黑配色"
+
+[settings]
+# 卷帘窗背景色
+piano_bg_r = 127
+piano_bg_g = 22
+piano_bg_b = 165
+
+# 钢琴键盘颜色
+white_key_r = 240
+white_key_g = 150
+white_key_b = 240
+black_key_r = 50
+black_key_g = 20
+black_key_b = 75
+
+# 音符颜色
+note_r = 255
+note_g = 0
+note_b = 255
+active_note_r = 255
+active_note_g = 200
+active_note_b = 255
+
+# 指针颜色
+cursor_r = 255
+cursor_g = 255
+cursor_b = 0
+
+# 音名色
+text_r = 255
+text_g = 75
+text_b = 255
+
+# 网格颜色 (严格照抄截图表单)
+grid_bright_r = 255
+grid_bright_g = 230
+grid_bright_b = 255
+grid_dim_r = 50
+grid_dim_g = 0
+grid_dim_b = 50
+
+# 布局与缩放设置 (沿用你最喜欢的初始值)
+pitch_min = 40
+pitch_range = 48
+time_offset = 0.0
+time_zoom = 1.0
+follow_playhead = true
+show_cursor = true
