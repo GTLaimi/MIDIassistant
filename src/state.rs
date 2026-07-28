@@ -82,7 +82,7 @@ impl Default for VisualSettings {
             horizontal_keyboard_width: 50.0,
             vertical_keyboard_height: 80.0,
             vertical_black_key_offset: 0.5,    // 新默认值
-            vertical_black_key_width_scale: 0.9, // 新默认值
+            vertical_black_key_width_scale: 1.0, // 新默认值
         }
     }
 }
