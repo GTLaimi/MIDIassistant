@@ -1,13 +1,16 @@
 [package]
 name = "midi_assistant"
-version = "0.1.0"
-edition = "2021"
+version = "0.1.4"
+edition = "2024"
 
 [dependencies]
-midly = { version = "0.5", features = ["std"] }
-anyhow = "1.0"
 eframe = "0.29"
 egui = "0.29"
-rfd = "0.14.1"
+midly = { version = "0.5", features = ["std"] }
+anyhow = "1.0"
+rfd = "0.14"
 serde = { version = "1.0", features = ["derive"] }
 toml = "0.8"
+rodio = "0.15"
+rustysynth = "1"
+cpal = "0.15"

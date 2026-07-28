@@ -1,6 +1,6 @@
 // src/ui/sidebar.rs
 use eframe::egui;
-use crate::state::AppState;
+use crate::state::{AppState, LayoutOrientation};
 use rfd::FileDialog;
 
 pub fn draw_sidebar(
@@ -29,6 +29,23 @@ pub fn draw_sidebar(
                 ctx.request_repaint();
             }
             ui.add_space(10.0);
+
+            // ---------- 布局切换 ----------
+            ui.separator();
+            ui.label("卷帘窗布局");
+            ui.horizontal(|ui| {
+                let current = state.settings.layout_orientation;
+                if ui.selectable_label(current == LayoutOrientation::Horizontal, "水平").clicked() {
+                    state.settings.layout_orientation = LayoutOrientation::Horizontal;
+                    ctx.request_repaint();
+                }
+                if ui.selectable_label(current == LayoutOrientation::Vertical, "垂直(瀑布流)").clicked() {
+                    state.settings.layout_orientation = LayoutOrientation::Vertical;
+                    ctx.request_repaint();
+                }
+            });
+            ui.add_space(10.0);
+            // ---------- 布局切换结束 ----------
 
             if let Some(err) = &state.load_error {
                 ui.colored_label(egui::Color32::from_rgb(255, 80, 80), err);

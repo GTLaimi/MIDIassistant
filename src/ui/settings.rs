@@ -101,12 +101,28 @@ pub fn draw_settings_window(ctx: &egui::Context, state: &mut AppState, open: &mu
                     ui.label("垂直缩放 (显示半音数)");
                     ui.add(egui::Slider::new(&mut state.settings.pitch_range, 12..=96).text("半音数"));
                     ui.separator();
-                    ui.label("水平缩放 (0.05 ~ 0.9)");
-                    ui.add(egui::Slider::new(&mut state.settings.time_zoom, 0.05..=0.9).text("zoom"));
+                    ui.label("水平缩放 (0.02 ~ 0.9)");
+                    ui.add(egui::Slider::new(&mut state.settings.time_zoom, 0.02..=0.9).text("zoom"));
                     ui.separator();
                     ui.checkbox(&mut state.settings.show_cursor, "显示指针");
                     ui.separator();
                     ui.checkbox(&mut state.settings.follow_playhead, "跟随播放头自动移动");
+                    ui.separator();
+                    ui.checkbox(&mut state.settings.enable_audio, "开启音频并预渲染");
+                    if !state.settings.enable_audio {
+                        ui.label("（关闭后，加载 MIDI 时将不会生成音频）");
+                    }
+                    ui.separator();
+                    ui.horizontal(|ui| {
+                        if ui.button("重置钢琴键盘为默认大小").clicked() {
+                            state.settings.horizontal_keyboard_width = 50.0;
+                            state.settings.vertical_keyboard_height = 80.0;
+                            state.settings.vertical_black_key_offset = 0.5;
+                            state.settings.vertical_black_key_width_scale = 0.9;
+                            ctx.request_repaint();
+                        }
+                        ui.label("（水平50px，垂直80px）");
+                    });
                 }
                 SettingsTab::About => {
                     ui.label("介绍：MIDIassistant 是一个轻量级、高精度的 MIDI 播放与可视化工具。");
