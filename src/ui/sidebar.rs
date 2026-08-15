@@ -1,4 +1,3 @@
-// src/ui/sidebar.rs
 use eframe::egui;
 use crate::state::{AppState, LayoutOrientation};
 use rfd::FileDialog;
@@ -43,9 +42,28 @@ pub fn draw_sidebar(
                     state.settings.layout_orientation = LayoutOrientation::Vertical;
                     ctx.request_repaint();
                 }
+                if ui.selectable_label(current == LayoutOrientation::Bar, "小节").clicked() {
+                    state.settings.layout_orientation = LayoutOrientation::Bar;
+                    ctx.request_repaint();
+                }
             });
             ui.add_space(10.0);
-            // ---------- 布局切换结束 ----------
+
+            // ---------- 音符持续高亮 ----------
+            ui.separator();
+            ui.checkbox(&mut state.settings.sustain_highlight, "音符持续高亮");
+            ui.add_space(10.0);
+
+            // ---------- 全屏按钮 ----------
+            ui.separator();
+            ui.horizontal(|ui| {
+                if ui.button(if state.fullscreen { "退出全屏" } else { "全屏" }).clicked() {
+                    state.fullscreen = !state.fullscreen;
+                    ctx.request_repaint();
+                }
+                ui.label("(F11)");
+            });
+            ui.add_space(10.0);
 
             if let Some(err) = &state.load_error {
                 ui.colored_label(egui::Color32::from_rgb(255, 80, 80), err);
@@ -73,7 +91,11 @@ pub fn draw_sidebar(
                 } else {
                     ui.label(format!("当前音符: {}", active_note_names.join(", ")));
                 }
-                ui.label("和弦分析: (扩展坞预留)");
+                if let Some(chord) = &state.current_chord {
+                    ui.label(format!("和弦: {}", chord));
+                } else {
+                    ui.label("和弦: (无)");
+                }
                 ui.separator();
             }
 

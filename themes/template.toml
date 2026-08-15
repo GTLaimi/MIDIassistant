@@ -1,6 +1,6 @@
 # MIDIassistant 完整主题配置模板 (包含所有颜色和布局设置)
-name = "我的专属主题"
-description = "基于全字段生成"
+name = "主题模板"
+description = "这是一个完整的主题配置模板，包含了所有可配置的颜色和布局设置。你可以根据自己的喜好修改这些值来创建自定义主题。"
 
 [settings]
 # 卷帘窗背景色
@@ -32,18 +32,10 @@ cursor_r = 255
 cursor_g = 255
 cursor_b = 0
 
-# 网格颜色（你这次报错缺少的就是这两行！）
+# 网格颜色
 grid_bright_r = 110
 grid_bright_g = 110
 grid_bright_b = 110
 grid_dim_r = 50
 grid_dim_g = 50
 grid_dim_b = 50
-
-# 布局与缩放设置
-pitch_min = 40
-pitch_range = 48
-time_offset = 0.0
-time_zoom = 1.0
-follow_playhead = true
-show_cursor = true

@@ -1,5 +1,5 @@
 name = "fire"
-description = "由用户自定义创建"
+description = "在日暮时燃烧"
 
 [settings]
 piano_bg_r = 75

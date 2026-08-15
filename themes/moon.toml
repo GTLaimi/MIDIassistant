@@ -1,5 +1,5 @@
 name = "moon"
-description = "由用户自定义创建"
+description = "唯有当时皓月，向人依旧"
 
 [settings]
 piano_bg_r = 0
@@ -14,9 +14,9 @@ black_key_b = 40
 note_r = 165
 note_g = 165
 note_b = 165
-active_note_r = 0
-active_note_g = 0
-active_note_b = 0
+active_note_r = 255
+active_note_g = 255
+active_note_b = 255
 text_r = 0
 text_g = 0
 text_b = 0
@@ -29,14 +29,41 @@ grid_bright_b = 75
 grid_dim_r = 45
 grid_dim_g = 45
 grid_dim_b = 45
-pitch_min = 40
+pitch_min = 21
 pitch_range = 48
-time_zoom = 0.019999999552965164
-follow_playhead = true
+time_zoom = 0.5
+follow_mode = "Edge"
+manual_offset_ratio = 0.0
 show_cursor = false
 enable_audio = true
-layout_orientation = "Horizontal"
+layout_orientation = "Bar"
 horizontal_keyboard_width = 50.0
 vertical_keyboard_height = 80.0
 vertical_black_key_offset = 0.5
-vertical_black_key_width_scale = 0.8999999761581421
+vertical_black_key_width_scale = 1.0
+sustain_highlight = true
+track_name = ""
+author = ""
+
+[settings.info_overlay]
+pos_x = 0.019999999552965164
+pos_y = 0.019999999552965164
+rotation = 0.0
+background_opacity = 0.6000000238418579
+enabled_fields = ["NoteCount", "CurrentTime", "ProgressPercent", "BarBeat"]
+group_positions = [[0.019999999552965164, 0.019999999552965164], [0.019999999552965164, 0.12000000476837158], [0.019999999552965164, 0.2199999988079071], [0.019999999552965164, 0.320000022649765], [0.019999999552965164, 0.42000001668930054], [0.019999999552965164, 0.5199999809265137], [0.019999999552965164, 0.6200000047683716], [0.019999999552965164, 0.7199999690055847]]
+text_color_r = 255
+text_color_g = 255
+text_color_b = 255
+show_border = false
+field_scales = [1.0, 1.0, 1.350000023841858, 1.0, 1.0, 1.350000023841858, 1.350000023841858, 1.0, 1.350000023841858, 1.0]
+
+[settings.bar_view]
+pos_x = 0.9975754022598267
+pos_y = 0.3628515303134918
+rotation = 0.0
+width_ratio = 0.800000011920929
+height_ratio = 0.699999988079071
+display_pitch_offset = 0
+display_pitch_range = 72
+visible = false

@@ -1,5 +1,5 @@
-name = "pink"
-description = "由用户自定义创建"
+name = "pink_light"
+description = "夏花绚烂"
 
 [settings]
 piano_bg_r = 180
