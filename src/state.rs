@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::collections::HashSet;
 use crate::models::note::Note;
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
@@ -20,6 +21,7 @@ impl Default for DisplayMode {
 pub enum LayoutOrientation {
     Horizontal,
     Vertical,
+    Bar,
 }
 
 impl Default for LayoutOrientation {
@@ -33,6 +35,102 @@ pub enum SettingsTab {
     Colors,
     Layout,
     About,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+pub enum FollowMode {
+    Edge,
+    Center,
+    Right,
+}
+
+impl Default for FollowMode {
+    fn default() -> Self {
+        FollowMode::Edge
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+pub enum InfoField {
+    TrackName,
+    Author,
+    NoteCount,
+    TimeSig,
+    Bpm,
+    CurrentTime,
+    ProgressPercent,
+    ActiveNotes,
+    BarBeat,
+    Chord,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(default)]
+pub struct InfoOverlaySettings {
+    pub pos_x: f32,
+    pub pos_y: f32,
+    //pub rotation: f32,
+    pub background_opacity: f32,
+    pub enabled_fields: Vec<InfoField>,
+    pub group_positions: Vec<(f32, f32)>,
+    pub text_color_r: u8,
+    pub text_color_g: u8,
+    pub text_color_b: u8,
+    pub show_border: bool,
+    pub field_scales: Vec<f32>,  // 每个字段的缩放系数
+}
+
+impl Default for InfoOverlaySettings {
+    fn default() -> Self {
+        Self {
+            pos_x: 0.02,
+            pos_y: 0.02,
+            //rotation: 0.0,
+            background_opacity: 0.6,
+            enabled_fields: vec![
+                InfoField::TrackName,
+                InfoField::Author,
+                InfoField::NoteCount,
+                InfoField::TimeSig,
+                InfoField::Bpm,
+                InfoField::CurrentTime,
+            ],
+            group_positions: vec![],
+            text_color_r: 255,
+            text_color_g: 255,
+            text_color_b: 255,
+            show_border: false,
+            field_scales: vec![],
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(default)]
+pub struct BarViewSettings {
+    pub pos_x: f32,
+    pub pos_y: f32,
+    pub rotation: f32,
+    pub width_ratio: f32,
+    pub height_ratio: f32,
+    pub display_pitch_offset: i32,
+    pub display_pitch_range: i32,
+    pub visible: bool,
+}
+
+impl Default for BarViewSettings {
+    fn default() -> Self {
+        Self {
+            pos_x: 0.1,
+            pos_y: 0.1,
+            rotation: 0.0,
+            width_ratio: 0.8,
+            height_ratio: 0.7,
+            display_pitch_offset: 0,
+            display_pitch_range: 48,
+            visible: false,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -50,7 +148,8 @@ pub struct VisualSettings {
     pub pitch_min: i32,
     pub pitch_range: i32,
     pub time_zoom: f32,
-    pub follow_playhead: bool,
+    pub follow_mode: FollowMode,
+    pub manual_offset_ratio: f32,
     pub show_cursor: bool,
     pub enable_audio: bool,
     pub layout_orientation: LayoutOrientation,
@@ -58,6 +157,11 @@ pub struct VisualSettings {
     pub vertical_keyboard_height: f32,
     pub vertical_black_key_offset: f32,
     pub vertical_black_key_width_scale: f32,
+    pub sustain_highlight: bool,
+    pub track_name: String,
+    pub author: String,
+    pub info_overlay: InfoOverlaySettings,
+    pub bar_view: BarViewSettings,
 }
 
 impl Default for VisualSettings {
@@ -75,14 +179,20 @@ impl Default for VisualSettings {
             pitch_min: 40,
             pitch_range: 48,
             time_zoom: 0.5,
-            follow_playhead: true,
+            follow_mode: FollowMode::default(),
+            manual_offset_ratio: 0.0,
             show_cursor: true,
             enable_audio: true,
             layout_orientation: LayoutOrientation::Horizontal,
             horizontal_keyboard_width: 50.0,
             vertical_keyboard_height: 80.0,
-            vertical_black_key_offset: 0.5,    // 新默认值
-            vertical_black_key_width_scale: 1.0, // 新默认值
+            vertical_black_key_offset: 0.5,
+            vertical_black_key_width_scale: 1.0,
+            sustain_highlight: false,
+            track_name: String::new(),
+            author: String::new(),
+            info_overlay: InfoOverlaySettings::default(),
+            bar_view: BarViewSettings::default(),
         }
     }
 }
@@ -111,6 +221,9 @@ pub struct AppState {
     pub is_rendering: bool,
     pub render_progress: f32,
     pub render_success: bool,
+    pub fullscreen: bool,
+    pub played_note_indices: HashSet<usize>,
+    pub current_chord: Option<String>,
 }
 
 impl AppState {
@@ -138,6 +251,22 @@ impl AppState {
             is_rendering: false,
             render_progress: 0.0,
             render_success: false,
+            fullscreen: false,
+            played_note_indices: HashSet::new(),
+            current_chord: None,
         }
     }
 }
+
+pub const ALL_INFO_FIELDS: &[InfoField] = &[
+    InfoField::TrackName,
+    InfoField::Author,
+    InfoField::NoteCount,
+    InfoField::TimeSig,
+    InfoField::Bpm,
+    InfoField::CurrentTime,
+    InfoField::ProgressPercent,
+    InfoField::ActiveNotes,
+    InfoField::BarBeat,
+    InfoField::Chord,
+];

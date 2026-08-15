@@ -4,6 +4,10 @@ mod theme_window;
 mod note_list_window;
 mod sidebar;
 mod piano_roll;
+mod horizontal;
+mod vertical;
+pub mod bar;
+mod info_overlay;
 
 pub use settings::draw_settings_window;
 pub use theme_window::draw_theme_window;

@@ -1,6 +1,6 @@
 use eframe::egui;
 use egui::Align2;
-use crate::state::{AppState, SettingsTab};
+use crate::state::{AppState, SettingsTab, FollowMode, InfoField, ALL_INFO_FIELDS};
 use crate::theme_manager;
 
 pub fn draw_settings_window(ctx: &egui::Context, state: &mut AppState, open: &mut bool) {
@@ -10,7 +10,7 @@ pub fn draw_settings_window(ctx: &egui::Context, state: &mut AppState, open: &mu
         .resizable(true)
         .anchor(Align2::CENTER_CENTER, egui::vec2(0.0, 0.0))
         .show(ctx, |ui| {
-            ui.label("v0.1.4 — 全面自定义");
+            ui.label("v0.2.0 — 交互增强");
             ui.separator();
 
             ui.horizontal(|ui| {
@@ -96,38 +96,129 @@ pub fn draw_settings_window(ctx: &egui::Context, state: &mut AppState, open: &mu
                     });
                 }
                 SettingsTab::Layout => {
-                    ui.label("垂直滚动 (基准音高)");
-                    ui.add(egui::Slider::new(&mut state.settings.pitch_min, 0..=96).text("Pitch Min"));
-                    ui.label("垂直缩放 (显示半音数)");
-                    ui.add(egui::Slider::new(&mut state.settings.pitch_range, 12..=96).text("半音数"));
-                    ui.separator();
-                    ui.label("水平缩放 (0.02 ~ 0.9)");
-                    ui.add(egui::Slider::new(&mut state.settings.time_zoom, 0.02..=0.9).text("zoom"));
-                    ui.separator();
-                    ui.checkbox(&mut state.settings.show_cursor, "显示指针");
-                    ui.separator();
-                    ui.checkbox(&mut state.settings.follow_playhead, "跟随播放头自动移动");
-                    ui.separator();
-                    ui.checkbox(&mut state.settings.enable_audio, "开启音频并预渲染");
-                    if !state.settings.enable_audio {
-                        ui.label("（关闭后，加载 MIDI 时将不会生成音频）");
-                    }
-                    ui.separator();
-                    ui.horizontal(|ui| {
-                        if ui.button("重置钢琴键盘为默认大小").clicked() {
-                            state.settings.horizontal_keyboard_width = 50.0;
-                            state.settings.vertical_keyboard_height = 80.0;
-                            state.settings.vertical_black_key_offset = 0.5;
-                            state.settings.vertical_black_key_width_scale = 0.9;
-                            ctx.request_repaint();
+                    ui.collapsing("通用设置", |ui| {
+                        ui.add(egui::Slider::new(&mut state.settings.pitch_min, 0..=96).text("基准音高 (Pitch Min)"));
+                        ui.add(egui::Slider::new(&mut state.settings.pitch_range, 12..=96).text("显示半音数"));
+                        ui.add(egui::Slider::new(&mut state.settings.time_zoom, 0.02..=0.9).text("水平缩放 (zoom)"));
+                        ui.separator();
+
+                        ui.label("播放头跟随模式");
+                        ui.horizontal(|ui| {
+                            ui.radio_value(&mut state.settings.follow_mode, FollowMode::Edge, "边缘");
+                            ui.radio_value(&mut state.settings.follow_mode, FollowMode::Center, "居中");
+                            ui.radio_value(&mut state.settings.follow_mode, FollowMode::Right, "偏右");
+                        });
+                        if state.settings.follow_mode != FollowMode::Edge {
+                            ui.add(egui::Slider::new(&mut state.settings.manual_offset_ratio, 0.0..=1.0).text("手动偏移"));
+                        } else {
+                            ui.label("边缘模式下不显示光标，视图固定跟随播放头。");
                         }
-                        ui.label("（水平50px，垂直80px）");
+                        ui.separator();
+
+                        ui.checkbox(&mut state.settings.show_cursor, "显示指针");
+                        ui.checkbox(&mut state.settings.enable_audio, "开启音频并预渲染");
+                        if !state.settings.enable_audio {
+                            ui.label("（关闭后，加载 MIDI 时将不会生成音频）");
+                        }
+                        ui.separator();
+
+                        ui.horizontal(|ui| {
+                            if ui.button("重置钢琴键盘为默认大小").clicked() {
+                                state.settings.horizontal_keyboard_width = 50.0;
+                                state.settings.vertical_keyboard_height = 80.0;
+                                state.settings.vertical_black_key_offset = 0.5;
+                                state.settings.vertical_black_key_width_scale = 0.9;
+                                ctx.request_repaint();
+                            }
+                            ui.label("（水平50px，垂直80px）");
+                        });
+                    });
+
+                    ui.collapsing("小节视图设置 (Bar View)", |ui| {
+                        ui.checkbox(&mut state.settings.bar_view.visible, "显示方框边框（仍绘制内容）");
+                        ui.add(egui::Slider::new(&mut state.settings.bar_view.width_ratio, 0.3..=1.0).text("宽度比例"));
+                        ui.add(egui::Slider::new(&mut state.settings.bar_view.height_ratio, 0.3..=1.0).text("高度比例"));
+                        let mut degrees = state.settings.bar_view.rotation.to_degrees();
+                        ui.add(egui::Slider::new(&mut degrees, -180.0..=180.0).text("旋转角度 (°)"));
+                        state.settings.bar_view.rotation = degrees.to_radians();
+                        ui.add(egui::Slider::new(&mut state.settings.bar_view.display_pitch_range, 12..=72).text("音高范围 (半音数)"));
+                        ui.label("（可在卷帘窗中拖拽移动位置）");
+                    });
+
+                    ui.collapsing("曲目信息", |ui| {
+                        ui.horizontal(|ui| {
+                            ui.label("曲目名");
+                            ui.add(egui::TextEdit::singleline(&mut state.settings.track_name).hint_text("请输入曲目名"));
+                        });
+                        ui.horizontal(|ui| {
+                            ui.label("作者");
+                            ui.add(egui::TextEdit::singleline(&mut state.settings.author).hint_text("请输入作者"));
+                        });
+                    });
+
+                    ui.collapsing("信息覆盖设置 (Info Overlay)", |ui| {
+                        ui.label("信息文本颜色");
+                        ui.horizontal(|ui| {
+                            ui.label("R");
+                            ui.add(egui::Slider::new(&mut state.settings.info_overlay.text_color_r, 0..=255));
+                        });
+                        ui.horizontal(|ui| {
+                            ui.label("G");
+                            ui.add(egui::Slider::new(&mut state.settings.info_overlay.text_color_g, 0..=255));
+                        });
+                        ui.horizontal(|ui| {
+                            ui.label("B");
+                            ui.add(egui::Slider::new(&mut state.settings.info_overlay.text_color_b, 0..=255));
+                        });
+                        ui.separator();
+
+                        ui.checkbox(&mut state.settings.info_overlay.show_border, "显示边框");
+                        ui.add(egui::Slider::new(&mut state.settings.info_overlay.background_opacity, 0.0..=1.0).text("背景透明度"));
+
+                        ui.label("显示字段与缩放：");
+                        while state.settings.info_overlay.field_scales.len() < ALL_INFO_FIELDS.len() {
+                            state.settings.info_overlay.field_scales.push(1.0);
+                        }
+                        egui::Grid::new("info_fields_grid")
+                            .num_columns(2)
+                            .spacing([20.0, 4.0])
+                            .show(ui, |ui| {
+                                for (idx, &field) in ALL_INFO_FIELDS.iter().enumerate() {
+                                    let mut checked = state.settings.info_overlay.enabled_fields.contains(&field);
+                                    let mut scale = state.settings.info_overlay.field_scales[idx];
+                                    let label = match field {
+                                        InfoField::TrackName => "曲目名",
+                                        InfoField::Author => "作者",
+                                        InfoField::NoteCount => "音符计数",
+                                        InfoField::TimeSig => "拍号",
+                                        InfoField::Bpm => "BPM",
+                                        InfoField::CurrentTime => "当前时间",
+                                        InfoField::ProgressPercent => "进度",
+                                        InfoField::ActiveNotes => "当前音符",
+                                        InfoField::BarBeat => "小节/拍",
+                                        InfoField::Chord => "和弦",
+                                    };
+                                    if ui.checkbox(&mut checked, label).changed() {
+                                        if checked {
+                                            if !state.settings.info_overlay.enabled_fields.contains(&field) {
+                                                state.settings.info_overlay.enabled_fields.push(field);
+                                            }
+                                        } else {
+                                            state.settings.info_overlay.enabled_fields.retain(|f| *f != field);
+                                        }
+                                    }
+                                    ui.add(egui::Slider::new(&mut scale, 0.5..=2.0).text("缩放").smallest_positive(0.1));
+                                    state.settings.info_overlay.field_scales[idx] = scale;
+                                    ui.end_row();
+                                }
+                            });
+                        ui.label("（可在卷帘窗中拖拽移动位置）");
                     });
                 }
                 SettingsTab::About => {
                     ui.label("介绍：MIDIassistant 是一个轻量级、高精度的 MIDI 播放与可视化工具。");
                     ui.label("帮助：按 空格键 播放/暂停，按 R 键 重置。");
-                    ui.label("版本：v0.1.4");
+                    ui.label("版本：v0.2.0");
                     ui.label("版权：MIT License");
                 }
             }
