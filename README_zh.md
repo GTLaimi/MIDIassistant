@@ -1,92 +1,89 @@
-# 🎹 MIDIassistant
+# 🎹 MIDIassistant — 轻量级 MIDI 播放与可视化工具
 
-> 轻量级、高精度的 MIDI 播放与可视化工具
+**MIDIassistant** 是一款高精度、低延迟的 MIDI 播放与可视化工具。支持多种布局、实时和弦检测、可自定义主题与信息覆盖，让您以更直观的方式欣赏 MIDI 音乐。
 
-![版本](https://img.shields.io/badge/version-v0.1.5-blue)
-![Rust](https://img.shields.io/badge/Rust-1.97%2B-orange)
-![许可](https://img.shields.io/badge/license-MIT-green)
 
-## ✨ 特性
+---
 
-- **🎵 MIDI 解析与播放**：支持标准 MIDI 文件（.mid/.midi），精确解析音符、速度、拍号等元数据
-- **🎨 双布局卷帘窗**：
-  - **水平模式**：经典键盘左侧布局，时间轴水平向右
-  - **垂直瀑布流模式**：键盘底部，时间轴垂直向上流动，适合观察音符时值
-- **🎚 可调节钢琴键盘**：拖拽分隔条自由调节键盘大小，最窄可完全隐藏
-- **🎛 高音质音频引擎**：基于 rustysynth + cpal，支持混响/合唱，采样率自适应设备最高品质
-- **🎨 主题系统**：内置7款精美主题，支持自定义主题文件（TOML 格式）
-- **🎯 精准进度同步**：采用 f64 时间计算，长 MIDI 也无节奏偏移
-- **📊 多种显示模式**：时间、进度百分比、音符计数、小节拍号等一键切换
+## ✨ v0.2.0 新特性
 
-## 🚀 快速开始
+### 🎨 交互与视觉增强
+- **三种播放头跟随模式**：边缘 / 居中 / 偏右，适应不同观看习惯
+- **全屏模式**（F11），沉浸式观看体验
+- **浮动信息覆盖层**：可独立显示/隐藏 10 类信息，支持拖拽位置与缩放
+- **小节视图（Bar View）**：聚焦当前小节音符，支持旋转与拖拽定位
 
-### 环境要求
-- Rust 1.97+ (如需从源码编译)
-- 音色库文件 `piano.sf2` (放置于程序根目录)
+### 🔍 智能分析与显示
+- **音符持续高亮**：播放过的音符保持高亮，便于回顾
+- **曲目名与作者**：可自定义输入，显示在信息覆盖
 
-### 安装
+### 🎛️ 丰富的自定义选项
+- **7+ 款预设主题**：forest, pink_dream, sunny, moon, 等
+- **全颜色自定义**：背景、键盘、音符、网格、指针等
+- **布局切换**：水平、垂直（瀑布流）、小节三种模式
+- **键盘尺寸可调**：水平/垂直键盘宽度/高度均可拖拽调节
 
-**从源码编译**
+---
+
+## 📥 下载与安装
+
+### Windows 用户
+下载最新版本的 `.exe` 安装包，双击运行即可。
+
+### 从源码编译（macOS / Linux / Windows）
 ```bash
 git clone https://github.com/yourusername/MIDIassistant.git
 cd MIDIassistant
 cargo build --release
+./target/release/midi_assistant
 ```
-**下载预编译版本**
-请访问 Releases 页面 下载对应平台安装包。
 
-### 使用
-
-1. 将 piano.sf2 放入程序根目录
-2. 启动程序，点击 "加载 MIDI 文件" 选择 .mid 文件
-3. 使用空格键播放/暂停，R 键重置
-4. 在侧边栏切换水平/垂直布局
-5. 拖拽键盘边缘分隔条调节大小
-
-### 🎨 主题定制
-
-主题文件位于 ./themes/ 目录，格式为 TOML。示例：
-```toml
-name = "我的主题"
-description = "自定义配色"
-
-[settings]
-piano_bg_r = 22
-piano_bg_g = 22
-piano_bg_b = 22
-white_key_r = 240
-white_key_g = 240
-white_key_b = 240
-note_r = 100
-note_g = 210
-note_b = 100
-# ... 更多颜色字段
+### 前置要求：
 ```
-### 📁 项目结构
-
-```text
-MIDIassistant/
-├── src/                 # 源代码
-│   ├── audio_engine.rs  # 音频引擎（渲染与播放）
-│   ├── midi_parser.rs   # MIDI 解析
-│   ├── playback.rs      # 时间同步
-│   ├── state.rs         # 全局状态
-│   ├── theme_manager.rs # 主题管理
-│   └── ui/              # 界面组件
-│       ├── piano_roll.rs    # 卷帘窗
-│       ├── settings.rs      # 设置窗口
-│       └── sidebar.rs       # 侧边栏
-├── themes/              # 预设主题
-├── piano.sf2            # 音色库（需自行准备）
-└── Cargo.toml
+Rust 1.70+
+Cargo
 ```
-### 🛠 开发路线
 
-- v0.2.0：MIDI 编辑功能（音符拖拽、移动、拉伸）
-- v0.3.0：高质量导出（MP3/MP4），VST 插件支持
-- v1.0.0：跨平台稳定版发布
+### （音频渲染需）piano.sf2 音色库文件放在程序运行目录下
 
-### 📄 许可
 
-MIT License © 2024 MIDIassistant Contributors
+## 🎮 基本操作
+快捷键	功能
 
+- Space	播放 / 暂停
+- R	重置播放位置
+- F11	切换全屏模式
+- 鼠标拖拽	拖动进度条 / 键盘分隔条 / 信息覆盖 / 小节方框
+
+
+### 注意： 在第一次加载MIDI前不能关闭音频预渲染，会导致卡顿闪退问题（已经在修了awa）
+
+## 🖥️ 界面说明
+侧边栏：加载 MIDI、切换布局、全屏、音符持续高亮、显示曲目信息与和弦
+
+卷帘窗：主显示区域，支持三种布局
+
+底部走带：播放控制、进度条、时间/进度/小节信息
+
+设置窗口：颜色、布局、曲目信息、信息覆盖等全面自定义
+
+## 🧩 系统要求
+Windows 7 / 10 / 11（推荐）
+
+其他平台：需 Rust 工具链编译
+
+音频输出：需 WASAPI / ALSA / CoreAudio 兼容设备
+
+## 📜 开源协议
+MIT License
+
+## 🙏 致谢
+egui — 即时模式 GUI
+
+midly — MIDI 解析
+
+rustysynth — MIDI 合成
+
+cpal — 音频输出
+
+Enjoy your music! 🎵
