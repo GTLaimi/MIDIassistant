@@ -35,7 +35,7 @@
 git clone https://github.comGTLaimi/HesychiaMidS.git
 cd HesychiaMidS
 cargo build --release
-./target/release/midi_assistant
+./target/release/hesychiamids
 ```
 
 ### 前置要求：

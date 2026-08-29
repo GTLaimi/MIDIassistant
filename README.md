@@ -57,9 +57,9 @@ Prerequisites:
 Clone and build:
 
     git clone https://github.com/GTLaimi/HesychiaMidS.git
-    cd hesychiamids
+    cd HesychiaMidS
     cargo build --release
-    ./target/release/midi_assistant
+    ./target/release/hesychiamids
 
 ### Soundfont
 Place a `piano.sf2` soundfont file in the program's working directory for audio rendering.
