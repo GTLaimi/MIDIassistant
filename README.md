@@ -2,7 +2,7 @@
 
 > Lightweight, high-precision MIDI player and visualizer
 
-![Version](https://img.shields.io/badge/version-v0.2.0-blue)
+![Version](https://img.shields.io/badge/version-v0.2.2-blue)
 ![Rust](https://img.shields.io/badge/Rust-1.70%2B-orange)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
@@ -38,6 +38,7 @@ HesychiaMidS is a high-precision, low-latency MIDI playback and visualization to
 - Customizable track title and author display
 - 7+ new themes and full color customization (background, keyboard, notes, grid, playhead, etc.)
 - Adjustable keyboard size via drag (both horizontal and vertical)
+- Shift the overlay texts' fonts via adding your own fonts file into the `fonts` directory!
 
 ---
 
@@ -61,8 +62,17 @@ Clone and build:
     cargo build --release
     ./target/release/hesychiamids
 
+or
+```
+cargo install hesychiamids
+```
+
 ### Soundfont
 Place a `piano.sf2` soundfont file in the program's working directory for audio rendering.
+
+### fonts
+
+Place a `fonts` directory in the program's working directory for fonts shifting.
 
 ---
 
@@ -76,6 +86,7 @@ Place a `piano.sf2` soundfont file in the program's working directory for audio 
 | Mouse drag    | Drag progress bar / keyboard divider / info overlay / bar box |
 
 > **Note**: Audio pre‑rendering cannot be disabled before loading a MIDI file for the first time; otherwise, lag or crashes may occur (already being fixed 😊).
+ And if you've downloaded our v0.2.1 version, please shift to v0.2.2 to get the LTS audio engine!
 
 ---
 
@@ -140,7 +151,7 @@ You can also adjust colors directly from the settings window without editing fil
 ## 🛠 Roadmap
 
 - **v0.2.0** (current): Enhanced visualization, info overlay, bar view, persistent highlights, more themes.
-- **v0.3.0**: MIDI editing (drag, move, stretch notes), MP3/MP4 export.
+- **v0.3.0**:  MP3/MP4 export, video export, etc.
 - **v1.0.0**: Cross-platform stable release with VST plugin support.
 
 ---
@@ -160,4 +171,7 @@ MIT License © 2024–2026 hesychiamids Contributors
 
 ---
 
+###   [sourse code webside](https://github.com/GTLaimi/HesychiaMidS)
+
+---
 **Enjoy your music! 🎵**

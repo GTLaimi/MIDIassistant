@@ -1,13 +1,12 @@
 use std::fs::File;
-use std::io::{BufReader};
+use std::io::BufReader;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 use cpal::{
     traits::{DeviceTrait, HostTrait, StreamTrait},
-    Stream, StreamConfig, BufferSize,
+    Stream, StreamConfig, 
 };
-use rodio::{OutputStream, Sink};
 use rustysynth::{SoundFont, Synthesizer, SynthesizerSettings};
 
 use crate::state::AppState;
@@ -15,14 +14,13 @@ use crate::models::note::Note;
 
 pub struct AudioEngine {
     sound_font: Arc<SoundFont>,
-    _stream: OutputStream,
-    sink: Sink,
     cached_audio: Option<Arc<Vec<f32>>>,
     is_playing: bool,
     render_state: Option<RenderState>,
     playback_stream: Option<Stream>,
     playback_cursor: Arc<AtomicUsize>,
-    output_sample_rate: u32,
+    sample_rate: u32,
+    output_config: Option<StreamConfig>,
 }
 
 struct RenderState {
@@ -45,52 +43,22 @@ impl AudioEngine {
             .map_err(|e| format!("解析SF2失败: {}", e))?;
         let sound_font = Arc::new(sound_font);
 
-        let (_stream, stream_handle) = OutputStream::try_default()
-            .map_err(|e| format!("打开音频输出失败: {}", e))?;
-        let sink = Sink::try_new(&stream_handle)
-            .map_err(|e| format!("创建Sink失败: {}", e))?;
-        sink.play();
-
-        // ---- 选择最高品质采样率（优先 96000 / 48000） ----
-        let host = cpal::default_host();
-        let sample_rate = if let Some(device) = host.default_output_device() {
-            let mut best_rate = 44100;
-            if let Ok(supported) = device.supported_output_configs() {
-                for cfg in supported {
-                    if cfg.channels() == 2 {
-                        let max_rate = cfg.max_sample_rate().0;
-                        if max_rate >= 96000 {
-                            best_rate = 96000;
-                            break;
-                        } else if max_rate >= 48000 {
-                            best_rate = 48000;
-                        } else if max_rate > best_rate {
-                            best_rate = max_rate;
-                        }
-                    }
-                }
-            }
-            best_rate
-        } else {
-            44100
-        };
-
         Ok(Self {
             sound_font,
-            _stream,
-            sink,
             cached_audio: None,
             is_playing: false,
             render_state: None,
             playback_stream: None,
             playback_cursor: Arc::new(AtomicUsize::new(0)),
-            output_sample_rate: sample_rate,
+            sample_rate: 44100,
+            output_config: None,
         })
     }
 
     pub fn clear(&mut self) {
         self.stop_playback();
         self.cached_audio = None;
+        self.render_state = None;
     }
 
     fn stop_playback(&mut self) {
@@ -101,72 +69,61 @@ impl AudioEngine {
         self.is_playing = false;
     }
 
+    fn get_best_output_config(&self, desired_rate: u32) -> Result<StreamConfig, String> {
+        let host = cpal::default_host();
+        let device = host.default_output_device()
+            .ok_or("没有可用的音频输出设备")?;
+
+        let supported = device.supported_output_configs()
+            .map_err(|e| format!("获取设备配置失败: {}", e))?
+            .filter(|cfg| cfg.channels() == 2)
+            .collect::<Vec<_>>();
+
+        if supported.is_empty() {
+            return Err("设备不支持立体声输出".to_string());
+        }
+
+        for cfg in &supported {
+            let min = cfg.min_sample_rate().0;
+            let max = cfg.max_sample_rate().0;
+            if min <= desired_rate && max >= desired_rate {
+                return Ok(cfg.with_sample_rate(cpal::SampleRate(desired_rate)).config());
+            }
+        }
+
+        // 备选：最高可用采样率
+        let mut best = None;
+        let mut best_rate = 0;
+        for cfg in &supported {
+            let max = cfg.max_sample_rate().0;
+            if max > best_rate {
+                best_rate = max;
+                best = Some(cfg.with_sample_rate(cpal::SampleRate(max)).config());
+            }
+        }
+        best.ok_or_else(|| "无法找到合适的音频配置".to_string())
+    }
+
     fn create_stream(&mut self, audio_data: Arc<Vec<f32>>, start_paused: bool) -> Result<(), String> {
         self.stop_playback();
+
+        let config = if let Some(cfg) = &self.output_config {
+            cfg.clone()
+        } else {
+            let cfg = self.get_best_output_config(self.sample_rate)?;
+            self.output_config = Some(cfg.clone());
+            cfg
+        };
 
         let host = cpal::default_host();
         let device = host.default_output_device()
             .ok_or("没有可用的音频输出设备")?;
 
-        let desired_rate = self.output_sample_rate;
-        let mut config: Option<StreamConfig> = None;
-
-        if let Ok(supported_iter) = device.supported_output_configs() {
-            // supported_iter is an iterator that gets moved when iterated once,
-            // so collect it to reuse below.
-            let supported: Vec<_> = supported_iter.collect();
-            for cfg in &supported {
-                if cfg.channels() == 2
-                    && cfg.min_sample_rate().0 <= desired_rate
-                    && cfg.max_sample_rate().0 >= desired_rate
-                {
-                    config = Some(cfg.with_sample_rate(cpal::SampleRate(desired_rate)).config());
-                    break;
-                }
-            }
-            if config.is_none() {
-                for cfg in &supported {
-                    if cfg.channels() == 2 {
-                        config = Some(cfg.with_max_sample_rate().config());
-                        break;
-                    }
-                }
-            }
-        }
-
-        let stream_config = if let Some(cfg) = config {
-            cfg
-        } else {
-            match device.default_output_config() {
-                Ok(cfg) => {
-                    if cfg.channels() == 2 {
-                        cfg.config()
-                    } else {
-                        let mut fallback = None;
-                        if let Ok(supported) = device.supported_output_configs() {
-                            for c in supported {
-                                if c.channels() == 2 {
-                                    fallback = Some(c.with_max_sample_rate().config());
-                                    break;
-                                }
-                            }
-                        }
-                        fallback.unwrap_or(StreamConfig {
-                            channels: 2,
-                            sample_rate: cpal::SampleRate(desired_rate),
-                            buffer_size: BufferSize::Default,
-                        })
-                    }
-                }
-                Err(e) => return Err(format!("无法获取默认配置: {}", e)),
-            }
-        };
-
         let data_clone = audio_data.clone();
         let cursor_clone = self.playback_cursor.clone();
 
         let stream = device.build_output_stream(
-            &stream_config,
+            &config,
             move |data: &mut [f32], _: &cpal::OutputCallbackInfo| {
                 let pos = cursor_clone.load(Ordering::Acquire);
                 let total = data_clone.len();
@@ -191,7 +148,6 @@ impl AudioEngine {
 
         self.playback_stream = Some(stream);
         self.is_playing = !start_paused;
-
         Ok(())
     }
 
@@ -202,11 +158,17 @@ impl AudioEngine {
             return Ok(());
         }
 
-        let sample_rate = self.output_sample_rate as f64;
+        let desired_rate = 48000;
+        let config = self.get_best_output_config(desired_rate)?;
+        let sample_rate = config.sample_rate.0;
+        self.sample_rate = sample_rate;
+        self.output_config = Some(config);
+
+        let sample_rate_f64 = sample_rate as f64;
         let bps = bpm as f64 / 60.0;
         let ticks_per_second = bps * ppq as f64;
         let duration_secs = total_ticks as f64 / ticks_per_second;
-        let total_samples = (duration_secs * sample_rate) as usize;
+        let total_samples = (duration_secs * sample_rate_f64) as usize;
 
         if total_samples == 0 {
             return Ok(());
@@ -234,7 +196,7 @@ impl AudioEngine {
             offset: 0,
             total_samples,
             ticks_per_second,
-            sample_rate,
+            sample_rate: sample_rate_f64,
             notes: sorted_notes,
             current_note_idx: 0,
         });
@@ -249,11 +211,12 @@ impl AudioEngine {
         };
 
         if rs.offset >= rs.total_samples {
+            // 渲染完成，组装交错音频（使用安全增益，避免削波）
             let mut interleaved = Vec::with_capacity(rs.total_samples * 2);
-            let gain = 2.0_f32;
+            const GAIN: f32 = 1.0; // 修正为 1.0，避免失真
             for i in 0..rs.total_samples {
-                let l = (rs.left[i] * gain).clamp(-1.0, 1.0);
-                let r = (rs.right[i] * gain).clamp(-1.0, 1.0);
+                let l = (rs.left[i] * GAIN).clamp(-1.0, 1.0);
+                let r = (rs.right[i] * GAIN).clamp(-1.0, 1.0);
                 interleaved.push(l);
                 interleaved.push(r);
             }
@@ -263,7 +226,6 @@ impl AudioEngine {
             self.cached_audio = Some(audio_data.clone());
             self.render_state = None;
 
-            // 预创建流（暂停状态）
             if let Err(e) = self.create_stream(audio_data, true) {
                 eprintln!("[WARN] 预创建流失败: {}", e);
             }
@@ -281,18 +243,20 @@ impl AudioEngine {
             let note = &rs.notes[rs.current_note_idx];
             let note_start = note.start_tick as f64;
             let note_end = note_start + note.duration as f64;
-            let original_vel = note.velocity;
-            let effective_vel = if original_vel == 0 { 80 } else { original_vel };
+            let effective_vel = if note.velocity == 0 { 80 } else { note.velocity };
 
             if note_start >= end_tick {
                 break;
             }
+
             if note_start >= start_tick && note_start < end_tick && effective_vel > 0 {
                 rs.synthesizer.process_midi_message(0, 0x90, note.pitch as i32, effective_vel as i32);
             }
+
             if note_end >= start_tick && note_end < end_tick {
                 rs.synthesizer.process_midi_message(0, 0x80, note.pitch as i32, 0);
             }
+
             rs.current_note_idx += 1;
         }
 
@@ -327,7 +291,6 @@ impl AudioEngine {
             return;
         }
 
-        // 若流尚未创建，补建
         if self.playback_stream.is_none() {
             if let Err(e) = self.create_stream(audio_data.clone(), true) {
                 eprintln!("[ERROR] 补建流失败: {}", e);
@@ -337,8 +300,22 @@ impl AudioEngine {
             }
         }
 
-        let should_play = state.is_playing && !state.is_rendering;
+        let total_samples = audio_data.len();
+        let target_pos = if state.total_ticks > 0 {
+            let progress = state.current_tick as f64 / state.total_ticks as f64;
+            let pos = (progress * total_samples as f64) as usize;
+            pos.min(total_samples)
+        } else {
+            0
+        };
 
+        let current_cursor = self.playback_cursor.load(Ordering::Acquire);
+        const SEEK_THRESHOLD: usize = 128;
+        if target_pos.abs_diff(current_cursor) > SEEK_THRESHOLD {
+            self.playback_cursor.store(target_pos, Ordering::Release);
+        }
+
+        let should_play = state.is_playing && !state.is_rendering;
         if let Some(stream) = &self.playback_stream {
             if should_play {
                 if let Err(e) = stream.play() {
@@ -353,22 +330,6 @@ impl AudioEngine {
             }
         }
 
-        // 更新游标跟随 MIDI 进度
-        let total_samples = audio_data.len();
-        let target_pos = if state.total_ticks > 0 {
-            let progress = state.current_tick as f64 / state.total_ticks as f64;
-            (progress * total_samples as f64) as usize
-        } else {
-            0
-        };
-        let target_pos = target_pos.min(total_samples);
-
-        let current_cursor = self.playback_cursor.load(Ordering::Acquire);
-        if target_pos.abs_diff(current_cursor) > 4096 {
-            self.playback_cursor.store(target_pos, Ordering::Release);
-        }
-
-        // 检测播放结束
         let cursor = self.playback_cursor.load(Ordering::Acquire);
         if cursor >= total_samples {
             state.is_playing = false;
@@ -377,13 +338,13 @@ impl AudioEngine {
                 let _ = stream.pause();
             }
             self.playback_cursor.store(0, Ordering::Release);
+            state.current_tick = 0;
         }
     }
 }
 
 impl Drop for AudioEngine {
     fn drop(&mut self) {
-        self.sink.stop();
         self.clear();
     }
 }
