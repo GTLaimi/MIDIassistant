@@ -1,6 +1,6 @@
-# 🎹 hesychiamids — 轻量级 MIDI 播放与可视化工具
+# 🎹 HesychiaMidS — 轻量级 MIDI 播放与可视化工具
 
-**hesychiamids** 是一款高精度、低延迟的 MIDI 播放与可视化工具。支持多种布局、实时和弦检测、可自定义主题与信息覆盖，让您以更直观的方式欣赏 MIDI 音乐。
+**HesychiaMidS** 是一款高精度、低延迟的 MIDI 播放与可视化工具。支持多种布局、实时和弦检测、可自定义主题与信息覆盖，让您以更直观的方式欣赏 MIDI 音乐。
 
 
 ---
@@ -32,13 +32,8 @@
 
 ### 从源码编译（macOS / Linux / Windows）
 ```bash
-<<<<<<< HEAD
-git clone https://github.comGTLaimi/MIDIassistant.git
-cd MIDIassistant
-=======
-git clone https://github.comGTLaimi/hesychiamids.git
-cd hesychiamids
->>>>>>> c55e139 (rename: MIDIassistant -> HesychiaMidS (hesychiamids))
+git clone https://github.comGTLaimi/HesychiaMidS.git
+cd HesychiaMidS
 cargo build --release
 ./target/release/midi_assistant
 ```
