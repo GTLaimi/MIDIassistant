@@ -32,7 +32,7 @@
 
 ### 从源码编译（macOS / Linux / Windows）
 ```bash
-git clone https://github.com/yourusername/MIDIassistant.git
+git clone https://github.comGTLaimi/MIDIassistant.git
 cd MIDIassistant
 cargo build --release
 ./target/release/midi_assistant

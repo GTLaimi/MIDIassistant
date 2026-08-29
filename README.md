@@ -44,7 +44,7 @@ MIDIassistant is a high-precision, low-latency MIDI playback and visualization t
 ## 📥 Download & Installation
 
 ### Windows Users
-Download the latest `.exe` installer from the [Releases](https://github.com/yourusername/MIDIassistant/releases) page and double‑click to run.
+Download the latest `.exe` installer from the [Releases](https://github.com/GTLaimi/MIDIassistant/releases) page and double‑click to run.
 
 ### Build from Source (macOS / Linux / Windows)
 
@@ -54,7 +54,7 @@ Prerequisites:
 
 Clone and build:
 
-    git clone https://github.com/yourusername/MIDIassistant.git
+    git clone https://github.com/GTLaimi/MIDIassistant.git
     cd MIDIassistant
     cargo build --release
     ./target/release/midi_assistant
