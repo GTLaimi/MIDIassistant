@@ -132,7 +132,6 @@ pub fn draw_bar_layout(
         let note_height = box_height / pitch_range as f32 * 0.8;
 
         let is_active = is_playing && current_tick >= note.start_tick && current_tick <= note.start_tick + note.duration;
-        // 持续高亮：仅当音符已经开始播放（start_tick <= current_tick），且在当前小节内
         let is_highlighted = settings.sustain_highlight && note.start_tick <= current_tick;
         let color = if is_active || is_highlighted {
             Color32::from_rgb(settings.active_note_r, settings.active_note_g, settings.active_note_b)
@@ -159,29 +158,22 @@ pub fn draw_bar_layout(
         painter.line_segment([p1, p2], Stroke::new(2.0_f32, cursor_color));
     }
 
-    // 交互拖拽（带旋转坐标转换）
-    if let Some(mouse) = ui.ctx().pointer_latest_pos() {
-        let dx = mouse.x - center.x;
-        let dy = mouse.y - center.y;
-        let cos = angle.cos();
-        let sin = angle.sin();
-        let local_x = center.x + dx * cos + dy * sin;
-        let local_y = center.y - dx * sin + dy * cos;
-
-        let in_box = local_x >= pos_x && local_x <= pos_x + box_width
-            && local_y >= pos_y && local_y <= pos_y + box_height;
-
-        if in_box {
-            let response = ui.interact(box_rect, egui::Id::new("bar_view_move"), Sense::drag());
-            if response.dragged() {
-                let delta = response.drag_delta();
-                let local_delta_x = delta.x * cos + delta.y * sin;
-                let local_delta_y = -delta.x * sin + delta.y * cos;
-                settings.bar_view.pos_x += local_delta_x / rect.width();
-                settings.bar_view.pos_y += local_delta_y / rect.height();
-                ui.ctx().request_repaint();
-            }
-        }
+    // ----- 优化拖拽交互（像素级精确跟随，移出框仍继续） -----
+    // 使用轴对齐包围盒作为交互区域（点击检测），但拖拽时按像素位移更新位置
+    let response = ui.interact(box_rect, egui::Id::new("bar_view_move"), Sense::drag());
+    if response.dragged() {
+        let delta = response.drag_delta();
+        // 当前左上角像素位置（未旋转前的原始位置）
+        let current_px_x = rect.min.x + (rect.width() - box_width) * settings.bar_view.pos_x;
+        let current_px_y = rect.min.y + (rect.height() - box_height) * settings.bar_view.pos_y;
+        let new_px_x = current_px_x + delta.x;
+        let new_px_y = current_px_y + delta.y;
+        // 转回归一化并限制在 [0,1]
+        let new_ratio_x = ((new_px_x - rect.min.x) / (rect.width() - box_width)).clamp(0.0, 1.0);
+        let new_ratio_y = ((new_px_y - rect.min.y) / (rect.height() - box_height)).clamp(0.0, 1.0);
+        settings.bar_view.pos_x = new_ratio_x;
+        settings.bar_view.pos_y = new_ratio_y;
+        ui.ctx().request_repaint();
     }
 }
 
@@ -190,6 +182,7 @@ fn draw_keyboard<F>(painter: &egui::Painter, rect: Rect, settings: &VisualSettin
 where
     F: Fn(egui::Pos2) -> egui::Pos2,
 {
+    // ... 与之前完全相同，未改动 ...
     let white_key_col = Color32::from_rgb(settings.white_key_r, settings.white_key_g, settings.white_key_b);
     let black_key_col = Color32::from_rgb(settings.black_key_r, settings.black_key_g, settings.black_key_b);
     let text_col = Color32::from_rgb(settings.text_r, settings.text_g, settings.text_b);
@@ -197,12 +190,11 @@ where
     let pitch_min = settings.pitch_min;
     let pitch_range = settings.pitch_range;
     let key_height = rect.height() / pitch_range as f32;
-    let _key_width = rect.width();
     let opacity = 0.35;
 
-    // 白键（y 反转，低音在下）
+    // 白键
     for i in 0..=pitch_range {
-        let rel_y = 1.0 - (i as f32 / pitch_range as f32); // 反转
+        let rel_y = 1.0 - (i as f32 / pitch_range as f32);
         let y = rect.min.y + rel_y * rect.height();
         let actual_pitch = pitch_min + i;
         let mod12 = actual_pitch % 12;
@@ -225,7 +217,7 @@ where
         }
     }
 
-    // 黑键（宽度与白键相同，y 反转）
+    // 黑键
     for i in 0..=pitch_range {
         let rel_y = 1.0 - (i as f32 / pitch_range as f32);
         let y = rect.min.y + rel_y * rect.height();
@@ -250,7 +242,7 @@ where
         }
     }
 
-    // 音名（C 处，y 反转）
+    // 音名（C 处）
     let font_size = (key_height * 0.25).clamp(6.0, 14.0);
     for i in 0..=pitch_range {
         let actual_pitch = pitch_min + i;

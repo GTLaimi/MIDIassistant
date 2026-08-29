@@ -1,0 +1,68 @@
+name = "pure"
+description = "由用户自定义创建"
+
+[settings]
+piano_bg_r = 0
+piano_bg_g = 0
+piano_bg_b = 255
+white_key_r = 0
+white_key_g = 0
+white_key_b = 255
+black_key_r = 0
+black_key_g = 0
+black_key_b = 0
+note_r = 0
+note_g = 0
+note_b = 255
+active_note_r = 0
+active_note_g = 0
+active_note_b = 0
+text_r = 0
+text_g = 0
+text_b = 0
+cursor_r = 0
+cursor_g = 0
+cursor_b = 255
+grid_bright_r = 0
+grid_bright_g = 0
+grid_bright_b = 255
+grid_dim_r = 0
+grid_dim_g = 0
+grid_dim_b = 255
+pitch_min = 40
+pitch_range = 48
+time_zoom = 0.05000000074505806
+follow_mode = "Right"
+manual_offset_ratio = 0.0
+show_cursor = true
+enable_audio = true
+layout_orientation = "Horizontal"
+horizontal_keyboard_width = 50.0
+vertical_keyboard_height = 80.0
+vertical_black_key_offset = 0.5
+vertical_black_key_width_scale = 1.0
+sustain_highlight = true
+track_name = ""
+author = ""
+
+[settings.info_overlay]
+pos_x = 0.019999999552965164
+pos_y = 0.019999999552965164
+background_opacity = 0.6000000238418579
+enabled_fields = []
+group_positions = [[0.019999999552965164, 0.019999999552965164], [0.019999999552965164, 0.12000000476837158], [0.019999999552965164, 0.2199999988079071], [0.019999999552965164, 0.320000022649765], [0.019999999552965164, 0.42000001668930054], [0.019999999552965164, 0.5199999809265137]]
+text_color_r = 255
+text_color_g = 255
+text_color_b = 255
+show_border = false
+field_scales = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+
+[settings.bar_view]
+pos_x = 0.10000000149011612
+pos_y = 0.10000000149011612
+rotation = 0.0
+width_ratio = 1.0
+height_ratio = 1.0
+display_pitch_offset = 0
+display_pitch_range = 48
+visible = false

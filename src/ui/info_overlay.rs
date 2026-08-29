@@ -1,5 +1,5 @@
 use eframe::egui;
-use egui::{Color32, FontId, Rect, Stroke, Sense};
+use egui::{Color32, FontFamily, FontId, Rect, Stroke, Sense};
 use crate::state::{InfoField, InfoOverlaySettings, VisualSettings, ALL_INFO_FIELDS};
 
 pub fn draw_info_overlay(
@@ -29,31 +29,36 @@ pub fn draw_info_overlay(
         settings.group_positions.push((0.02, default_y));
     }
 
-    let groups: Vec<(InfoField, String, f32)> = settings.enabled_fields
+    // 确保 field_font_names 长度足够
+    while settings.field_font_names.len() < ALL_INFO_FIELDS.len() {
+        settings.field_font_names.push("proportional".to_string());
+    }
+
+    let groups: Vec<(InfoField, String, f32, String)> = settings.enabled_fields
         .iter()
         .enumerate()
         .filter_map(|(_group_idx, field)| {
             let text = match field {
-                InfoField::TrackName => Some(format!("曲目: {}", track_name)),
-                InfoField::Author => Some(format!("作者: {}", author)),
-                InfoField::NoteCount => Some(format!("已播: {} / 总: {}", note_count_played, note_count_total)),
-                InfoField::TimeSig => Some(format!("拍号: {}", time_sig)),
+                InfoField::TrackName => Some(format!("Track: {}", track_name)),
+                InfoField::Author => Some(format!("Author: {}", author)),
+                InfoField::NoteCount => Some(format!("Played: {} / Total: {}", note_count_played, note_count_total)),
+                InfoField::TimeSig => Some(format!("Time Sig: {}", time_sig)),
                 InfoField::Bpm => Some(format!("BPM: {:.1}", bpm)),
-                InfoField::CurrentTime => Some(format!("时间: {}", current_time_str)),
-                InfoField::ProgressPercent => Some(format!("进度: {:.1}%", progress)),
+                InfoField::CurrentTime => Some(format!("Time: {}", current_time_str)),
+                InfoField::ProgressPercent => Some(format!("Progress: {:.1}%", progress)),
                 InfoField::ActiveNotes => {
                     if active_note_names.is_empty() {
-                        Some("当前音符: 无".to_string())
+                        Some("Active Notes: None".to_string())
                     } else {
-                        Some(format!("当前音符: {}", active_note_names.join(", ")))
+                        Some(format!("Active Notes: {}", active_note_names.join(", ")))
                     }
                 }
-                InfoField::BarBeat => Some(format!("小节: {}", bar_beat_str)),
+                InfoField::BarBeat => Some(format!("Bar/Beat: {}", bar_beat_str)),
                 InfoField::Chord => {
                     if let Some(c) = chord {
-                        Some(format!("和弦: {}", c))
+                        Some(format!("Chord: {}", c))
                     } else {
-                        Some("和弦: (无)".to_string())
+                        Some("Chord: (None)".to_string())
                     }
                 }
             };
@@ -64,7 +69,12 @@ pub fn draw_info_overlay(
                 } else {
                     1.0
                 };
-                (*field, t, scale)
+                let font_name = if idx < settings.field_font_names.len() {
+                    settings.field_font_names[idx].clone()
+                } else {
+                    "proportional".to_string()
+                };
+                (*field, t, scale, font_name)
             })
         })
         .collect::<Vec<_>>();
@@ -77,14 +87,24 @@ pub fn draw_info_overlay(
     let base_padding = 8.0;
     let base_line_height = 20.0;
 
-    for (idx, (_field, text, scale)) in groups.iter().enumerate() {
+    for (idx, (_field, text, scale, font_name)) in groups.iter().enumerate() {
         let font_size = base_font_size * scale;
         let padding = base_padding * scale;
         let line_height = base_line_height * scale;
 
+        // 根据 font_name 创建 FontId
+        let font_id = if font_name == "proportional" {
+            FontId::new(font_size, FontFamily::Proportional)
+        } else if font_name == "monospace" {
+            FontId::new(font_size, FontFamily::Monospace)
+        } else {
+            // 自定义字体族（不会影响其他 UI）
+            FontId::new(font_size, FontFamily::Name(font_name.clone().into()))
+        };
+
         let galley = painter.layout(
             text.to_string(),
-            FontId::proportional(font_size),
+            font_id.clone(),
             Color32::WHITE,
             f32::INFINITY,
         );
@@ -96,7 +116,6 @@ pub fn draw_info_overlay(
         let pos_x = rect.min.x + (rect.width() - box_width) * pos_x_ratio;
         let pos_y = rect.min.y + (rect.height() - box_height) * pos_y_ratio;
 
-        // 无旋转，直接使用矩形
         let box_rect = Rect::from_min_max(
             egui::pos2(pos_x, pos_y),
             egui::pos2(pos_x + box_width, pos_y + box_height),
@@ -122,27 +141,29 @@ pub fn draw_info_overlay(
             text_pos,
             egui::Align2::LEFT_CENTER,
             text.clone(),
-            FontId::proportional(font_size),
+            font_id,
             text_color,
         );
 
-        // 边框（如果启用）
         if settings.show_border {
             painter.rect_stroke(box_rect, 4.0, Stroke::new(1.5_f32, Color32::from_rgb(100, 200, 255)));
         }
 
-        // 拖拽交互（无旋转）
-        if let Some(mouse) = ui.ctx().pointer_latest_pos() {
-            if box_rect.contains(mouse) {
-                let response = ui.interact(box_rect, egui::Id::new(format!("info_group_{}", idx)), Sense::drag());
-                if response.dragged() {
-                    let delta = response.drag_delta();
-                    let new_x = settings.group_positions[idx].0 + delta.x / rect.width();
-                    let new_y = settings.group_positions[idx].1 + delta.y / rect.height();
-                    settings.group_positions[idx] = (new_x, new_y);
-                    ui.ctx().request_repaint();
-                }
-            }
+        // ----- 优化拖拽交互（像素级精确跟随，移出框仍继续） -----
+        let response = ui.interact(box_rect, egui::Id::new(format!("info_group_{}", idx)), Sense::drag());
+        if response.dragged() {
+            let delta = response.drag_delta();
+            // 计算当前像素位置
+            let current_px_x = rect.min.x + (rect.width() - box_width) * settings.group_positions[idx].0;
+            let current_px_y = rect.min.y + (rect.height() - box_height) * settings.group_positions[idx].1;
+            // 加上鼠标位移（像素）
+            let new_px_x = current_px_x + delta.x;
+            let new_px_y = current_px_y + delta.y;
+            // 转换回归一化坐标，并限制在 [0,1]
+            let new_ratio_x = ((new_px_x - rect.min.x) / (rect.width() - box_width)).clamp(0.0, 1.0);
+            let new_ratio_y = ((new_px_y - rect.min.y) / (rect.height() - box_height)).clamp(0.0, 1.0);
+            settings.group_positions[idx] = (new_ratio_x, new_ratio_y);
+            ui.ctx().request_repaint();
         }
     }
 }

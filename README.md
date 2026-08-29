@@ -1,4 +1,4 @@
-# 🎹 MIDIassistant
+# 🎹 hesychiamids
 
 > Lightweight, high-precision MIDI player and visualizer
 
@@ -6,7 +6,7 @@
 ![Rust](https://img.shields.io/badge/Rust-1.70%2B-orange)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-MIDIassistant is a high-precision, low-latency MIDI playback and visualization tool written in Rust using `egui` and `eframe`. It supports multiple layouts, real-time chord detection, customizable themes, and information overlays, allowing you to enjoy MIDI music in a more intuitive way.
+hesychiamids is a high-precision, low-latency MIDI playback and visualization tool written in Rust using `egui` and `eframe`. It supports multiple layouts, real-time chord detection, customizable themes, and information overlays, allowing you to enjoy MIDI music in a more intuitive way.
 
 ---
 
@@ -44,7 +44,11 @@ MIDIassistant is a high-precision, low-latency MIDI playback and visualization t
 ## 📥 Download & Installation
 
 ### Windows Users
+<<<<<<< HEAD
 Download the latest `.exe` installer from the [Releases](https://github.com/GTLaimi/MIDIassistant/releases) page and double‑click to run.
+=======
+Download the latest `.exe` installer from the [Releases](https://github.com/GTLaimi/hesychiamids/releases) page and double‑click to run.
+>>>>>>> c55e139 (rename: MIDIassistant -> HesychiaMidS (hesychiamids))
 
 ### Build from Source (macOS / Linux / Windows)
 
@@ -54,8 +58,13 @@ Prerequisites:
 
 Clone and build:
 
+<<<<<<< HEAD
     git clone https://github.com/GTLaimi/MIDIassistant.git
     cd MIDIassistant
+=======
+    git clone https://github.com/GTLaimi/hesychiamids.git
+    cd hesychiamids
+>>>>>>> c55e139 (rename: MIDIassistant -> HesychiaMidS (hesychiamids))
     cargo build --release
     ./target/release/midi_assistant
 
@@ -111,7 +120,7 @@ You can also adjust colors directly from the settings window without editing fil
 
 ## 📁 Project Structure
 
-    MIDIassistant/
+    hesychiamids/
     ├── src/                 # Source code
     │   ├── audio_engine.rs  # Audio rendering & playback
     │   ├── midi_parser.rs   # MIDI parsing
@@ -145,7 +154,7 @@ You can also adjust colors directly from the settings window without editing fil
 
 ## 📄 License
 
-MIT License © 2024–2026 MIDIassistant Contributors
+MIT License © 2024–2026 hesychiamids Contributors
 
 ---
 

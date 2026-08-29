@@ -10,6 +10,8 @@ mod theme_manager;
 mod ui;
 mod audio_engine;
 mod app;
+mod font_loader;
+mod chord_detector;
 
 use eframe::egui;
 use app::MidiApp;
@@ -69,24 +71,19 @@ impl eframe::App for MidiApp {
 }
 
 fn main() -> eframe::Result<()> {
+    // 加载自定义字体（从 ./fonts/ 目录），没有目录也安全
+    let font_defs = font_loader::load_fonts();
+
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_inner_size([1000.0, 700.0])
             .with_min_inner_size([800.0, 600.0])
-            .with_title("MIDIassistant"),
+            .with_title("hesychiamids"),
         ..Default::default()
     };
 
-    eframe::run_native("MIDIassistant", options, Box::new(|cc| {
-        let mut fonts = egui::FontDefinitions::default();
-        if cfg!(target_os = "windows") {
-            if let Ok(data) = std::fs::read("c:/Windows/Fonts/msyh.ttc") {
-                fonts.font_data.insert("msyh".to_owned(), egui::FontData::from_owned(data).into());
-                fonts.families.get_mut(&egui::FontFamily::Proportional).unwrap().insert(0, "msyh".to_owned());
-                fonts.families.get_mut(&egui::FontFamily::Monospace).unwrap().push("msyh".to_owned());
-            }
-        }
-        cc.egui_ctx.set_fonts(fonts);
+    eframe::run_native("hesychiamids", options, Box::new(|cc| {
+        cc.egui_ctx.set_fonts(font_defs);
         Ok(Box::new(MidiApp::new()))
     }))
 }

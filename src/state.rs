@@ -69,7 +69,6 @@ pub enum InfoField {
 pub struct InfoOverlaySettings {
     pub pos_x: f32,
     pub pos_y: f32,
-    //pub rotation: f32,
     pub background_opacity: f32,
     pub enabled_fields: Vec<InfoField>,
     pub group_positions: Vec<(f32, f32)>,
@@ -77,15 +76,16 @@ pub struct InfoOverlaySettings {
     pub text_color_g: u8,
     pub text_color_b: u8,
     pub show_border: bool,
-    pub field_scales: Vec<f32>,  // 每个字段的缩放系数
+    pub field_scales: Vec<f32>,
+    pub field_font_names: Vec<String>,  // 新增
 }
 
 impl Default for InfoOverlaySettings {
     fn default() -> Self {
+        let default_fonts = vec!["proportional".to_string(); ALL_INFO_FIELDS.len()];
         Self {
             pos_x: 0.02,
             pos_y: 0.02,
-            //rotation: 0.0,
             background_opacity: 0.6,
             enabled_fields: vec![
                 InfoField::TrackName,
@@ -101,6 +101,7 @@ impl Default for InfoOverlaySettings {
             text_color_b: 255,
             show_border: false,
             field_scales: vec![],
+            field_font_names: default_fonts,
         }
     }
 }

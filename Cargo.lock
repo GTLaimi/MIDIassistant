@@ -1723,6 +1723,22 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fc0fef456e4baa96da950455cd02c081ca953b141298e41db3fc7e36b1da849c"
 
 [[package]]
+name = "hesychiamids"
+version = "0.2.0"
+dependencies = [
+ "anyhow",
+ "cpal 0.15.3",
+ "eframe",
+ "egui",
+ "midly",
+ "rfd",
+ "rodio",
+ "rustysynth",
+ "serde",
+ "toml",
+]
+
+[[package]]
 name = "hex"
 version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2182,22 +2198,6 @@ dependencies = [
  "log",
  "objc",
  "paste",
-]
-
-[[package]]
-name = "midi_assistant"
-version = "0.1.4"
-dependencies = [
- "anyhow",
- "cpal 0.15.3",
- "eframe",
- "egui",
- "midly",
- "rfd",
- "rodio",
- "rustysynth",
- "serde",
- "toml",
 ]
 
 [[package]]

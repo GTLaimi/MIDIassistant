@@ -1,7 +1,9 @@
 [package]
-name = "midi_assistant"
-version = "0.1.4"
+name = "hesychiamids"
+version = "0.2.0"
 edition = "2024"
+license = "MIT"
+description = "A Rust-based MIDI player with an integrated piano roll view."
 
 [dependencies]
 eframe = "0.29"

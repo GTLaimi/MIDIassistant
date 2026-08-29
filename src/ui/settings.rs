@@ -2,8 +2,12 @@ use eframe::egui;
 use egui::Align2;
 use crate::state::{AppState, SettingsTab, FollowMode, InfoField, ALL_INFO_FIELDS};
 use crate::theme_manager;
+use crate::font_loader;
 
 pub fn draw_settings_window(ctx: &egui::Context, state: &mut AppState, open: &mut bool) {
+    // 获取可用字体列表
+    let font_names = font_loader::get_available_font_names();
+
     egui::Window::new("设置")
         .open(open)
         .collapsible(false)
@@ -99,7 +103,7 @@ pub fn draw_settings_window(ctx: &egui::Context, state: &mut AppState, open: &mu
                     ui.collapsing("通用设置", |ui| {
                         ui.add(egui::Slider::new(&mut state.settings.pitch_min, 0..=96).text("基准音高 (Pitch Min)"));
                         ui.add(egui::Slider::new(&mut state.settings.pitch_range, 12..=96).text("显示半音数"));
-                        ui.add(egui::Slider::new(&mut state.settings.time_zoom, 0.02..=0.9).text("水平缩放 (zoom)"));
+                        ui.add(egui::Slider::new(&mut state.settings.time_zoom, 0.02..=0.9).text("水平缩放"));
                         ui.separator();
 
                         ui.label("播放头跟随模式");
@@ -111,7 +115,7 @@ pub fn draw_settings_window(ctx: &egui::Context, state: &mut AppState, open: &mu
                         if state.settings.follow_mode != FollowMode::Edge {
                             ui.add(egui::Slider::new(&mut state.settings.manual_offset_ratio, 0.0..=1.0).text("手动偏移"));
                         } else {
-                            ui.label("边缘模式下不显示光标，视图固定跟随播放头。");
+                            ui.label("边缘模式下视图跟随播放头，不显示指针。");
                         }
                         ui.separator();
 
@@ -134,7 +138,7 @@ pub fn draw_settings_window(ctx: &egui::Context, state: &mut AppState, open: &mu
                         });
                     });
 
-                    ui.collapsing("小节视图设置 (Bar View)", |ui| {
+                    ui.collapsing("小节视图设置", |ui| {
                         ui.checkbox(&mut state.settings.bar_view.visible, "显示方框边框（仍绘制内容）");
                         ui.add(egui::Slider::new(&mut state.settings.bar_view.width_ratio, 0.3..=1.0).text("宽度比例"));
                         ui.add(egui::Slider::new(&mut state.settings.bar_view.height_ratio, 0.3..=1.0).text("高度比例"));
@@ -156,7 +160,7 @@ pub fn draw_settings_window(ctx: &egui::Context, state: &mut AppState, open: &mu
                         });
                     });
 
-                    ui.collapsing("信息覆盖设置 (Info Overlay)", |ui| {
+                    ui.collapsing("信息覆盖设置", |ui| {
                         ui.label("信息文本颜色");
                         ui.horizontal(|ui| {
                             ui.label("R");
@@ -174,18 +178,26 @@ pub fn draw_settings_window(ctx: &egui::Context, state: &mut AppState, open: &mu
 
                         ui.checkbox(&mut state.settings.info_overlay.show_border, "显示边框");
                         ui.add(egui::Slider::new(&mut state.settings.info_overlay.background_opacity, 0.0..=1.0).text("背景透明度"));
+                        ui.separator();
 
-                        ui.label("显示字段与缩放：");
+                        ui.label("显示字段、缩放与字体：");
+                        // 确保 field_font_names 和 field_scales 长度足够
+                        while state.settings.info_overlay.field_font_names.len() < ALL_INFO_FIELDS.len() {
+                            state.settings.info_overlay.field_font_names.push("proportional".to_string());
+                        }
                         while state.settings.info_overlay.field_scales.len() < ALL_INFO_FIELDS.len() {
                             state.settings.info_overlay.field_scales.push(1.0);
                         }
+
                         egui::Grid::new("info_fields_grid")
-                            .num_columns(2)
-                            .spacing([20.0, 4.0])
+                            .num_columns(3)
+                            .spacing([20.0, 6.0])
                             .show(ui, |ui| {
                                 for (idx, &field) in ALL_INFO_FIELDS.iter().enumerate() {
                                     let mut checked = state.settings.info_overlay.enabled_fields.contains(&field);
                                     let mut scale = state.settings.info_overlay.field_scales[idx];
+                                    let mut font_name = state.settings.info_overlay.field_font_names[idx].clone();
+
                                     let label = match field {
                                         InfoField::TrackName => "曲目名",
                                         InfoField::Author => "作者",
@@ -198,6 +210,7 @@ pub fn draw_settings_window(ctx: &egui::Context, state: &mut AppState, open: &mu
                                         InfoField::BarBeat => "小节/拍",
                                         InfoField::Chord => "和弦",
                                     };
+
                                     if ui.checkbox(&mut checked, label).changed() {
                                         if checked {
                                             if !state.settings.info_overlay.enabled_fields.contains(&field) {
@@ -207,8 +220,20 @@ pub fn draw_settings_window(ctx: &egui::Context, state: &mut AppState, open: &mu
                                             state.settings.info_overlay.enabled_fields.retain(|f| *f != field);
                                         }
                                     }
+
                                     ui.add(egui::Slider::new(&mut scale, 0.5..=2.0).text("缩放").smallest_positive(0.1));
                                     state.settings.info_overlay.field_scales[idx] = scale;
+
+                                    // 字体下拉选择框
+                                    egui::ComboBox::from_id_salt(format!("font_{}", idx))
+                                        .selected_text(&font_name)
+                                        .show_ui(ui, |ui| {
+                                            for f in &font_names {
+                                                if ui.selectable_value(&mut font_name, f.clone(), f).changed() {
+                                                    state.settings.info_overlay.field_font_names[idx] = font_name.clone();
+                                                }
+                                            }
+                                        });
                                     ui.end_row();
                                 }
                             });
@@ -216,10 +241,10 @@ pub fn draw_settings_window(ctx: &egui::Context, state: &mut AppState, open: &mu
                     });
                 }
                 SettingsTab::About => {
-                    ui.label("介绍：MIDIassistant 是一个轻量级、高精度的 MIDI 播放与可视化工具。");
-                    ui.label("帮助：按 空格键 播放/暂停，按 R 键 重置。");
+                    ui.label("hesychiamids 是一个轻量级、高精度的 MIDI 播放与可视化工具。");
+                    ui.label("控制：空格键 播放/暂停，R 键 重置。");
                     ui.label("版本：v0.2.0");
-                    ui.label("版权：MIT License");
+                    ui.label("许可证：MIT");
                 }
             }
         });
