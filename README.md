@@ -48,7 +48,6 @@ HesychiaMidS is a high-precision, low-latency MIDI playback and visualization to
 
 Download the latest `.exe` installer from the [Releases](https://github.com/GTLaimi/HesychiaMidS/releases) page and double‑click to run.
 
-
 ### Build from Source (macOS / Linux / Windows)
 
 Prerequisites:
@@ -57,13 +56,16 @@ Prerequisites:
 
 Clone and build:
 
-    git clone https://github.com/GTLaimi/HesychiaMidS.git
-    cd HesychiaMidS
-    cargo build --release
-    ./target/release/hesychiamids
+```bash
+git clone https://github.com/GTLaimi/HesychiaMidS.git
+cd HesychiaMidS
+cargo build --release
+./target/release/hesychiamids
+```
 
 or
-```
+
+```bash
 cargo install hesychiamids
 ```
 
@@ -73,6 +75,21 @@ Place a `piano.sf2` soundfont file in the program's working directory for audio 
 ### fonts
 
 Place a `fonts` directory in the program's working directory for fonts shifting.
+
+---
+
+## 🐍 CLI Version: `hesym`
+
+Looking for a command-line MIDI parser? Check out **[hesym](https://github.com/GTLaimi/hesym)** – a Python CLI tool built on the same core parsing logic.
+
+```bash
+pip install hesym
+hesym song.mid --stats
+```
+
+- Lightweight, runs anywhere Python does
+- JSON output for script integration
+- Perfect for servers, CI/CD, or Termux
 
 ---
 
@@ -86,7 +103,7 @@ Place a `fonts` directory in the program's working directory for fonts shifting.
 | Mouse drag    | Drag progress bar / keyboard divider / info overlay / bar box |
 
 > **Note**: Audio pre‑rendering cannot be disabled before loading a MIDI file for the first time; otherwise, lag or crashes may occur (already being fixed 😊).
- And if you've downloaded our v0.2.1 version, please shift to v0.2.2 to get the LTS audio engine!
+> And if you've downloaded our v0.2.1 version, please shift to v0.2.2 to get the LTS audio engine!
 
 ---
 
@@ -103,20 +120,22 @@ Place a `fonts` directory in the program's working directory for fonts shifting.
 
 Theme files are stored in `./themes/` directory in TOML format. Example:
 
-    name = "My Theme"
-    description = "Custom color scheme"
+```toml
+name = "My Theme"
+description = "Custom color scheme"
 
-    [settings]
-    piano_bg_r = 22
-    piano_bg_g = 22
-    piano_bg_b = 22
-    white_key_r = 240
-    white_key_g = 240
-    white_key_b = 240
-    note_r = 100
-    note_g = 210
-    note_b = 100
-    # ... more color fields
+[settings]
+piano_bg_r = 22
+piano_bg_g = 22
+piano_bg_b = 22
+white_key_r = 240
+white_key_g = 240
+white_key_b = 240
+note_r = 100
+note_g = 210
+note_b = 100
+# ... more color fields
+```
 
 You can also adjust colors directly from the settings window without editing files.
 
@@ -124,21 +143,24 @@ You can also adjust colors directly from the settings window without editing fil
 
 ## 📁 Project Structure
 
-    hesychiamids/
-    ├── src/                 # Source code
-    │   ├── audio_engine.rs  # Audio rendering & playback
-    │   ├── midi_parser.rs   # MIDI parsing
-    │   ├── playback.rs      # Time synchronization
-    │   ├── state.rs         # Global state
-    │   ├── theme_manager.rs # Theme management
-    │   └── ui/              # UI components
-    │       ├── piano_roll.rs    # Piano roll rendering
-    │       ├── settings.rs      # Settings window
-    │       └── sidebar.rs       # Sidebar panel
-    ├── themes/              # Preset themes
-    ├── piano.sf2            # Soundfont (user-provided)
-    ├── Cargo.toml
-    └── fonts            # Fonts (user-provided)
+```
+hesychiamids/
+├── src/                 # Source code
+│   ├── audio_engine.rs  # Audio rendering & playback
+│   ├── midi_parser.rs   # MIDI parsing
+│   ├── playback.rs      # Time synchronization
+│   ├── state.rs         # Global state
+│   ├── theme_manager.rs # Theme management
+│   └── ui/              # UI components
+│       ├── piano_roll.rs    # Piano roll rendering
+│       ├── settings.rs      # Settings window
+│       └── sidebar.rs       # Sidebar panel
+├── themes/              # Preset themes
+├── piano.sf2            # Soundfont (user-provided)
+├── Cargo.toml
+└── fonts                # Fonts (user-provided)
+```
+
 ---
 
 ## 🧩 System Requirements
@@ -151,7 +173,7 @@ You can also adjust colors directly from the settings window without editing fil
 ## 🛠 Roadmap
 
 - **v0.2.0** (current): Enhanced visualization, info overlay, bar view, persistent highlights, more themes.
-- **v0.3.0**:  MP3/MP4 export, video export, etc.
+- **v0.3.0**: MP3/MP4 export, video export, etc.
 - **v1.0.0**: Cross-platform stable release with VST plugin support.
 
 ---
@@ -171,7 +193,8 @@ MIT License © 2024–2026 hesychiamids Contributors
 
 ---
 
-###   [sourse code webside](https://github.com/GTLaimi/HesychiaMidS)
+### 🔗 [Source Code](https://github.com/GTLaimi/HesychiaMidS)
 
 ---
+
 **Enjoy your music! 🎵**
