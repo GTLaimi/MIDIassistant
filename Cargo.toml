@@ -1,13 +1,12 @@
 [package]
 name = "hesychiamids"
-version = "0.2.2"
+version = "0.2.3"
 edition = "2024"
 license = "MIT"
 description = "A Rust-based MIDI player with an integrated piano roll view."
 exclude = [
     "fonts/*",
     "themes/*",
-    "*.txt",
     "*.sf2",
 ]
 
